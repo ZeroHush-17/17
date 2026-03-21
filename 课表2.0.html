@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>动态课表 · 自动保存（14周·含教室·单双周）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #f0f5fa 0%, #e6edf4 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 2.5rem;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        h1 {
+            font-size: 2.3rem;
+            font-weight: 600;
+            margin: 0 0 0.2rem 0;
+            background: linear-gradient(135deg, #162b38, #1e3f5c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .subtitle {
+            color: #2c4c6e;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid #3b82f6;
+            padding-left: 1rem;
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+        .control-panel {
+            background: white;
+            border-radius: 60px;
+            padding: 0.8rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(59,130,246,0.2);
+            gap: 15px;
+        }
+        .week-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f1f5f9;
+            padding: 0.3rem 1.5rem;
+            border-radius: 40px;
+        }
+        .week-selector label {
+            font-weight: 500;
+            color: #1e3a8a;
+        }
+        .week-selector select {
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .week-nav-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .week-nav-btn:hover {
+            background: #2563eb;
+        }
+        .live-clock {
+            font-size: 1.5rem;
+            font-weight: 550;
+            background: #1e293b;
+            color: white;
+            padding: 0.3rem 1.8rem;
+            border-radius: 40px;
+            letter-spacing: 1px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .now-course {
+            font-size: 1.3rem;
+            background: #dbeafe;
+            padding: 0.3rem 1.8rem;
+            border-radius: 40px;
+            color: #1e3a8a;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .countdown {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f59e0b20;
+            border-radius: 30px;
+            padding: 0.2rem 1rem;
+            font-weight: 600;
+            color: #b45309;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 28px;
+            background: white;
+            box-shadow: 0 20px 35px -8px rgba(0,20,40,0.2);
+            border: 1px solid #e9eef3;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+            table-layout: fixed;
+            font-size: 0.95rem;
+        }
+        th {
+            background: #f8fafd;
+            font-weight: 600;
+            padding: 18px 8px;
+            color: #1f2a3f;
+            border-bottom: 3px solid #cbd5e1;
+            font-size: 1.1rem;
+            letter-spacing: 0.3px;
+        }
+        td {
+            padding: 12px 6px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+        td:first-child {
+            background-color: #f1f5f9;
+            font-weight: 500;
+            color: #0b1e33;
+            border-right: 2px solid #cbd5e1;
+            white-space: nowrap;
+        }
+        .section-header td {
+            background-color: #e9f0f9 !important;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1e3a5f;
+            text-align: center;
+            border-bottom: 2px solid #a0b8cc;
+            border-top: 2px solid #a0b8cc;
+            padding: 10px;
+            letter-spacing: 1px;
+        }
+        .section-header td:first-child {
+            background-color: #e9f0f9 !important;
+        }
+        .course-block {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.4;
+        }
+        .course-name {
+            font-weight: 600;
+            color: #0b2d4b;
+            font-size: 1rem;
+        }
+        .course-room {
+            font-size: 0.85rem;
+            color: #5f6c84;
+            background: #f0f4fa;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin-top: 4px;
+            max-width: 90%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .empty-course {
+            color: #a0b3c9;
+            font-style: italic;
+            font-weight: 400;
+        }
+        .highlight {
+            background: #fef9c3 !important;
+            border: 2px solid #facc15 !important;
+            box-shadow: 0 0 0 3px rgba(250,204,21,0.2);
+            position: relative;
+            z-index: 2;
+            transform: scale(1.01);
+        }
+        td.highlight:first-child {
+            background: #fde047 !important;
+        }
+        .weekend-col {
+            background-color: #f9fafb;
+        }
+        .edit-hint {
+            margin-top: 25px;
+            font-size: 0.95rem;
+            color: #2c4c6e;
+            background: #e6f0fa;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+        .footer-note {
+            margin-top: 20px;
+            color: #5f6c80;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        td:hover {
+            background-color: #f5f9ff;
+        }
+        .time-col {
+            font-weight: 600;
+            background: #e9f0f9;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏫 课表</h1>
+    <div class="subtitle">⏱️ 每节45分钟，课间10分钟 · 双击格子编辑，支持单双周</div>
+
+    <div class="control-panel">
+        <div class="week-selector">
+            <label>📅 当前周：</label>
+            <select id="weekSelect"></select>
+            <button class="week-nav-btn" id="prevWeek">← 上一周</button>
+            <button class="week-nav-btn" id="nextWeek">下一周 →</button>
+        </div>
+        <div class="live-clock" id="liveClock">--:--:--</div>
+        <div class="now-course" id="nowCourseDisplay">
+            <span>📖 当前课程：</span>
+            <span id="currentCourseInfo">--</span>
+            <span class="countdown" id="countdownDisplay"></span>
+        </div>
+    </div>
+
+    <div class="table-wrapper" id="tableWrapper"></div>
+
+    <div class="edit-hint">
+        ✏️ 双击编辑格式：<strong>课程名, 教室, 周次</strong><br>
+        每周：高等数学, A101, 1-14 &nbsp;&nbsp;
+        单周：体育, 操场, 单周 &nbsp;&nbsp;
+        双周：实验, 实验室, 双周
+    </div>
+    <div class="footer-note">
+        ⏰ 上午 08:30～12:00 · 下午 13:30～17:00 · 晚上 18:00～21:30
+    </div>
+</div>
+
+<script>
+(function() {
+    const TOTAL_WEEKS = 14;
+    const STORAGE_KEY = 'dynamicTimetableData';
+    const TIME_SLOTS = [
+        { label: '08:30 – 09:15', start: 8*60+30, end: 9*60+15 },
+        { label: '09:25 – 10:10', start: 9*60+25, end: 10*60+10 },
+        { label: '10:20 – 11:05', start: 10*60+20, end: 11*60+5 },
+        { label: '11:15 – 12:00', start: 11*60+15, end: 12*60 },
+        { label: '13:30 – 14:15', start: 13*60+30, end: 14*60+15 },
+        { label: '14:25 – 15:10', start: 14*60+25, end: 15*60+10 },
+        { label: '15:20 – 16:05', start: 15*60+20, end: 16*60+5 },
+        { label: '16:15 – 17:00', start: 16*60+15, end: 17*60 },
+        { label: '18:00 – 18:45', start: 18*60, end: 18*60+45 },
+        { label: '18:55 – 19:40', start: 18*60+55, end: 19*60+40 },
+        { label: '19:50 – 20:35', start: 19*60+50, end: 20*60+35 },
+        { label: '20:45 – 21:30', start: 20*60+45, end: 21*60+30 }
+    ];
+    const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const GROUPS = [
+        { name: '☀️ 上午', startIdx: 0, endIdx: 3 },
+        { name: '⛅ 下午', startIdx: 4, endIdx: 7 },
+        { name: '🌙 晚上', startIdx: 8, endIdx: 11 }
+    ];
+
+    function getDefaultData() {
+        let data = Array(7).fill().map(() => Array(12).fill().map(() => ({
+            course: '—', room: '', weekType: 'all', startWeek: 1, endWeek: TOTAL_WEEKS
+        })));
+        return data;
+    }
+
+    function loadData() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed) && parsed.length === 7) return parsed;
+            } catch (e) {}
+        }
+        return getDefaultData();
+    }
+
+    function saveData(data) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    let courseData = loadData();
+    let currentWeek = 1;
+    let highlightTimer = null;
+
+    function initWeekSelect() {
+        const sel = document.getElementById('weekSelect');
+        for (let i = 1; i <= TOTAL_WEEKS; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = `第 ${i} 周`;
+            sel.appendChild(opt);
+        }
+        sel.value = currentWeek;
+        sel.addEventListener('change', () => {
+            currentWeek = parseInt(sel.value);
+            refresh();
+        });
+        document.getElementById('prevWeek').onclick = () => {
+            if (currentWeek > 1) { currentWeek--; sel.value = currentWeek; refresh(); }
+        };
+        document.getElementById('nextWeek').onclick = () => {
+            if (currentWeek < TOTAL_WEEKS) { currentWeek++; sel.value = currentWeek; refresh(); }
+        };
+    }
+
+    function isVisible(cell) {
+        if (cell.course === '—') return false;
+        if (currentWeek < cell.startWeek || currentWeek > cell.endWeek) return false;
+        if (cell.weekType === 'odd') return currentWeek % 2 === 1;
+        if (cell.weekType === 'even') return currentWeek % 2 === 0;
+        return true;
+    }
+
+    function renderTable() {
+        let html = '<table id="timetable"><thead><tr><th></th>';
+        WEEKDAYS.forEach(day => html += `<th>${day}</th>`);
+        html += '</tr></thead><tbody>';
+
+        GROUPS.forEach(g => {
+            html += `<tr class="section-header"><td colspan="8">${g.name}</td></tr>`;
+            for (let i = g.startIdx; i <= g.endIdx; i++) {
+                html += `<tr><td class="time-col">${TIME_SLOTS[i].label}</td>`;
+                for (let d = 0; d < 7; d++) {
+                    const cell = courseData[d][i];
+                    const show = isVisible(cell);
+                    const cls = d >= 5 ? 'weekend-col' : '';
+                    html += `<td class="${cls}" data-day="${d}" data-slot="${i}">`;
+                    if (show) {
+                        html += `<div class="course-block">
+                            <span class="course-name">${cell.course}</span>
+                            ${cell.room ? `<span class="course-room">${cell.room}</span>` : ''}
+                        </div>`;
+                    } else {
+                        html += `<div class="course-block"><span class="empty-course">—</span></div>`;
+                    }
+                    html += `</td>`;
+                }
+                html += `</tr>`;
+            }
+        });
+        html += '</tbody></table>';
+        document.getElementById('tableWrapper').innerHTML = html;
+        document.getElementById('timetable').addEventListener('dblclick', handleEdit);
+    }
+
+    function handleEdit(e) {
+        const td = e.target.closest('td');
+        if (!td) return;
+        const day = parseInt(td.dataset.day);
+        const slot = parseInt(td.dataset.slot);
+        const old = courseData[day][slot];
+
+        let ruleText = '';
+        if (old.weekType === 'odd') ruleText = '单周';
+        else if (old.weekType === 'even') ruleText = '双周';
+        else ruleText = `${old.startWeek}-${old.endWeek}`;
+
+        const def = (old.course === '—' ? '' : old.course)
+            + (old.room ? `, ${old.room}` : '')
+            + (old.course === '—' ? '' : `, ${ruleText}`);
+
+        const input = prompt('格式：课程名, 教室, 周次\n每周：1-14｜单周｜双周', def);
+        if (input === null) return;
+
+        const t = input.trim();
+        if (t === '' || t === '—') {
+            courseData[day][slot] = { course: '—', room: '', weekType: 'all', startWeek: 1, endWeek: TOTAL_WEEKS };
+            saveData(courseData); refresh(); return;
+        }
+
+        const parts = t.split(',').map(s => s.trim());
+        let course = parts[0] || '—';
+        let room = parts[1] || '';
+        let weekType = 'all';
+        let startWeek = 1, endWeek = TOTAL_WEEKS;
+
+        if (parts.length >= 3) {
+            const rule = parts[2];
+            if (rule === '单周') weekType = 'odd';
+            else if (rule === '双周') weekType = 'even';
+            else {
+                const [s, e] = rule.split('-').map(Number);
+                if (!isNaN(s) && !isNaN(e)) { startWeek = s; endWeek = e; }
+            }
+        }
+
+        courseData[day][slot] = { course, room, weekType, startWeek, endWeek };
+        saveData(courseData);
+        refresh();
+    }
+
+    function getNowCourse() {
+        const now = new Date();
+        const h = now.getHours(), m = now.getMinutes();
+        const nowMin = h * 60 + m;
+        const day = now.getDay();
+        const col = day === 0 ? 6 : day - 1;
+
+        let slotIdx = -1;
+        for (let i = 0; i < TIME_SLOTS.length; i++) {
+            const s = TIME_SLOTS[i];
+            if (nowMin >= s.start && nowMin < s.end) { slotIdx = i; break; }
+        }
+        if (slotIdx === -1) return null;
+        const cell = courseData[col][slotIdx];
+        if (!isVisible(cell)) return null;
+        return { col, slotIdx, cell };
+    }
+
+    function updateClockAndHighlight() {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('liveClock').innerText =
+            `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${hh}:${mm}:${ss}`;
+
+        document.querySelectorAll('.highlight').forEach(e => e.classList.remove('highlight'));
+        const curr = getNowCourse();
+        if (!curr) {
+            document.getElementById('currentCourseInfo').innerText = '无课';
+            document.getElementById('countdownDisplay').innerText = '';
+            return;
+        }
+        document.getElementById('currentCourseInfo').innerText =
+            curr.cell.course + (curr.cell.room ? ` (${curr.cell.room})` : '');
+        const td = document.querySelector(`td[data-day="${curr.col}"][data-slot="${curr.slotIdx}"]`);
+        if (td) td.classList.add('highlight');
+    }
+
+    function refresh() {
+        renderTable();
+        updateClockAndHighlight();
+    }
+
+    function start() {
+        initWeekSelect();
+        refresh();
+        highlightTimer = setInterval(updateClockAndHighlight, 1000);
+    }
+
+    window.addEventListener('DOMContentLoaded', start);
+    window.addEventListener('beforeunload', () => clearInterval(highlightTimer));
+})();
+</script>
+</body>
+</html>
