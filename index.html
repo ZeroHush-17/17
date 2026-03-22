@@ -2,301 +2,115 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>动态课表 · 自动保存（14周·含教室·单双周）</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
+    <title>课表 · 单双周 | 自动周数</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-        }
-        body {
-            background: linear-gradient(145deg, #f0f5fa 0%, #e6edf4 100%);
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            max-width: 1400px;
-            width: 100%;
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(4px);
-            border-radius: 2.5rem;
-            padding: 2rem 1.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.7);
-        }
-        h1 {
-            font-size: 2.3rem;
-            font-weight: 600;
-            margin: 0 0 0.2rem 0;
-            background: linear-gradient(135deg, #162b38, #1e3f5c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .subtitle {
-            color: #2c4c6e;
-            margin-bottom: 1.5rem;
-            border-left: 5px solid #3b82f6;
-            padding-left: 1rem;
-            font-weight: 400;
-            font-size: 1.1rem;
-        }
-        .control-panel {
-            background: white;
-            border-radius: 60px;
-            padding: 0.8rem 2rem;
-            margin-bottom: 2rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-            border: 1px solid rgba(59,130,246,0.2);
-            gap: 15px;
-        }
-        .week-selector {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: #f1f5f9;
-            padding: 0.3rem 1.5rem;
-            border-radius: 40px;
-        }
-        .week-selector label {
-            font-weight: 500;
-            color: #1e3a8a;
-        }
-        .week-selector select {
-            padding: 6px 12px;
-            border-radius: 30px;
-            border: 1px solid #cbd5e1;
-            background: white;
-            font-weight: 500;
-            cursor: pointer;
-        }
-        .week-nav-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .week-nav-btn:hover {
-            background: #2563eb;
-        }
-        .live-clock {
-            font-size: 1.5rem;
-            font-weight: 550;
-            background: #1e293b;
-            color: white;
-            padding: 0.3rem 1.8rem;
-            border-radius: 40px;
-            letter-spacing: 1px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .now-course {
-            font-size: 1.3rem;
-            background: #dbeafe;
-            padding: 0.3rem 1.8rem;
-            border-radius: 40px;
-            color: #1e3a8a;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .countdown {
-            font-family: 'JetBrains Mono', monospace;
-            background: #f59e0b20;
-            border-radius: 30px;
-            padding: 0.2rem 1rem;
-            font-weight: 600;
-            color: #b45309;
-        }
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 28px;
-            background: white;
-            box-shadow: 0 20px 35px -8px rgba(0,20,40,0.2);
-            border: 1px solid #e9eef3;
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1200px;
-            table-layout: fixed;
-            font-size: 0.95rem;
-        }
-        th {
-            background: #f8fafd;
-            font-weight: 600;
-            padding: 18px 8px;
-            color: #1f2a3f;
-            border-bottom: 3px solid #cbd5e1;
-            font-size: 1.1rem;
-            letter-spacing: 0.3px;
-        }
-        td {
-            padding: 12px 6px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-            background-color: white;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-            vertical-align: middle;
-        }
-        td:first-child {
-            background-color: #f1f5f9;
-            font-weight: 500;
-            color: #0b1e33;
-            border-right: 2px solid #cbd5e1;
-            white-space: nowrap;
-        }
-        .section-header td {
-            background-color: #e9f0f9 !important;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #1e3a5f;
-            text-align: center;
-            border-bottom: 2px solid #a0b8cc;
-            border-top: 2px solid #a0b8cc;
-            padding: 10px;
-            letter-spacing: 1px;
-        }
-        .section-header td:first-child {
-            background-color: #e9f0f9 !important;
-        }
-        .course-block {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            line-height: 1.4;
-        }
-        .course-name {
-            font-weight: 600;
-            color: #0b2d4b;
-            font-size: 1rem;
-        }
-        .course-room {
-            font-size: 0.85rem;
-            color: #5f6c84;
-            background: #f0f4fa;
-            padding: 2px 8px;
-            border-radius: 30px;
-            margin-top: 4px;
-            max-width: 90%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .empty-course {
-            color: #a0b3c9;
-            font-style: italic;
-            font-weight: 400;
-        }
-        .highlight {
-            background: #fef9c3 !important;
-            border: 2px solid #facc15 !important;
-            box-shadow: 0 0 0 3px rgba(250,204,21,0.2);
-            position: relative;
-            z-index: 2;
-            transform: scale(1.01);
-        }
-        td.highlight:first-child {
-            background: #fde047 !important;
-        }
-        .weekend-col {
-            background-color: #f9fafb;
-        }
-        .edit-hint {
-            margin-top: 25px;
-            font-size: 0.95rem;
-            color: #2c4c6e;
-            background: #e6f0fa;
-            padding: 10px 20px;
-            border-radius: 50px;
-            display: inline-block;
-        }
-        .footer-note {
-            margin-top: 20px;
-            color: #5f6c80;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-        td:hover {
-            background-color: #f5f9ff;
-        }
-        .time-col {
-            font-weight: 600;
-            background: #e9f0f9;
-        }
+        /* 样式保持不变（与您之前一致） */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #f5f7fb; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 16px; color: #1e293b; }
+        .container { max-width: 100%; }
+        .header { margin-bottom: 16px; }
+        h1 { font-size: 1.8rem; font-weight: 600; margin: 0 0 4px 0; background: linear-gradient(135deg, #1e3a5f, #2c4c6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.3px; }
+        .sub { font-size: 0.85rem; color: #4a627a; border-left: 3px solid #3b82f6; padding-left: 12px; margin: 8px 0 16px 0; }
+        .info-bar { background: white; border-radius: 60px; padding: 10px 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .live-clock { font-family: monospace; font-size: 1rem; font-weight: 600; background: #1e293b; color: white; padding: 6px 12px; border-radius: 40px; white-space: nowrap; }
+        .now-course { background: #eef2ff; border-radius: 40px; padding: 6px 12px; font-weight: 500; color: #1e3a8a; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.85rem; }
+        .countdown { background: #fef3c7; border-radius: 30px; padding: 4px 10px; font-family: monospace; font-weight: 600; color: #b45309; font-size: 0.75rem; }
+        .date-settings { background: white; border-radius: 20px; padding: 12px 16px; margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid #e2e8f0; }
+        .date-label { font-weight: 500; font-size: 0.85rem; color: #334155; }
+        input[type="date"] { background: #f1f5f9; border: none; padding: 8px 12px; border-radius: 30px; font-size: 0.85rem; cursor: pointer; }
+        .current-week { background: #e6f0fa; border-radius: 30px; padding: 6px 14px; font-weight: 600; font-size: 0.9rem; color: #1e3a8a; }
+        .week-selector { background: white; border-radius: 60px; padding: 8px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid #e2e8f0; }
+        .week-label { font-weight: 500; color: #334155; font-size: 0.9rem; }
+        select { background: #f1f5f9; border: none; padding: 8px 12px; border-radius: 40px; font-weight: 500; font-size: 0.9rem; cursor: pointer; }
+        .week-nav { display: flex; gap: 8px; }
+        .week-btn { background: #3b82f6; color: white; border: none; padding: 6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 500; cursor: pointer; }
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 24px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e9eef3; margin-bottom: 16px; }
+        table { min-width: 700px; width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: #f8fafc; padding: 12px 6px; font-weight: 600; color: #0f172a; border-bottom: 2px solid #cbd5e1; font-size: 0.9rem; }
+        td { padding: 10px 6px; text-align: center; border: 1px solid #e2e8f0; background-color: white; vertical-align: middle; cursor: pointer; }
+        td:first-child { background-color: #f1f5f9; font-weight: 500; color: #0b1e33; white-space: nowrap; font-size: 0.8rem; }
+        .section-header td { background-color: #e9f0f9 !important; font-weight: 700; font-size: 1rem; color: #1e3a5f; padding: 8px; text-align: center; }
+        .course-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .course-name { font-weight: 600; color: #0b2d4b; font-size: 0.9rem; }
+        .course-room { font-size: 0.7rem; color: #5f6c84; background: #f0f4fa; padding: 2px 8px; border-radius: 30px; display: inline-block; }
+        .empty-course { color: #a0b3c9; font-style: italic; }
+        .highlight { background: #fef9c3 !important; border: 2px solid #facc15 !important; box-shadow: inset 0 0 0 1px white; }
+        .footer { font-size: 0.7rem; text-align: center; color: #6c7a8a; margin-top: 16px; }
+        .edit-hint { font-size: 0.75rem; color: #4b6e8a; background: #eef2ff; padding: 8px 16px; border-radius: 30px; text-align: center; margin-top: 12px; }
+        .btn-group { display: flex; gap: 12px; justify-content: center; margin: 16px 0; }
+        .reset-btn { background: #ef4444; color: white; border: none; padding: 8px 20px; border-radius: 40px; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+        .reset-btn:hover { background: #dc2626; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🏫 课表</h1>
-    <div class="subtitle">⏱️ 每节45分钟，课间10分钟 · 双击格子编辑，支持单双周</div>
+    <div class="header">
+        <h1>📅 课表 · 单双周</h1>
+        <div class="sub">45分钟/节 · 课间10分钟 · 实时高亮</div>
+    </div>
 
-    <div class="control-panel">
-        <div class="week-selector">
-            <label>📅 当前周：</label>
-            <select id="weekSelect"></select>
-            <button class="week-nav-btn" id="prevWeek">← 上一周</button>
-            <button class="week-nav-btn" id="nextWeek">下一周 →</button>
-        </div>
+    <div class="info-bar">
         <div class="live-clock" id="liveClock">--:--:--</div>
-        <div class="now-course" id="nowCourseDisplay">
-            <span>📖 当前课程：</span>
+        <div class="now-course">
+            <span>📖</span>
             <span id="currentCourseInfo">--</span>
             <span class="countdown" id="countdownDisplay"></span>
         </div>
     </div>
 
+    <div class="date-settings">
+        <span class="date-label">📅 开学日期 (周一)</span>
+        <input type="date" id="startDateInput">
+        <span class="current-week" id="currentWeekDisplay">第--周</span>
+    </div>
+
+    <div class="week-selector">
+        <span class="week-label">📅 查看第</span>
+        <select id="weekSelect"></select>
+        <span>周</span>
+        <div class="week-nav">
+            <button class="week-btn" id="prevWeek">←</button>
+            <button class="week-btn" id="nextWeek">→</button>
+        </div>
+    </div>
+
+    <!-- 重置按钮组 -->
+    <div class="btn-group">
+        <button id="resetBtn" class="reset-btn">🔄 重置默认课表</button>
+    </div>
+
     <div class="table-wrapper" id="tableWrapper"></div>
 
     <div class="edit-hint">
-        ✏️ 双击编辑格式：<strong>课程名, 教室, 周次</strong><br>
-        每周：高等数学, A101, 1-14 &nbsp;&nbsp;
-        单周：体育, 操场, 单周 &nbsp;&nbsp;
-        双周：实验, 实验室, 双周
+        ✏️ 双击课程格子修改：<strong>课程名, 教室, 起始周-结束周, 单双周</strong><br>
+        单双周: <strong>all</strong>(每周) / <strong>odd</strong>(单周) / <strong>even</strong>(双周)<br>
+        示例: 高等数学, A101, 1-14, odd
     </div>
-    <div class="footer-note">
-        ⏰ 上午 08:30～12:00 · 下午 13:30～17:00 · 晚上 18:00～21:30
+    <div class="footer">
+        上午 8:30-12:00 · 下午 13:30-17:00 · 晚上 18:00-21:30
     </div>
 </div>
 
 <script>
-(function() {
+    // ---------- 常量 ----------
     const TOTAL_WEEKS = 14;
-    const STORAGE_KEY = 'dynamicTimetableData';
+    const STORAGE_KEY = 'timetableWithOddEven';
+    const START_DATE_KEY = 'startDate';
+    
     const TIME_SLOTS = [
-        { label: '08:30 – 09:15', start: 8*60+30, end: 9*60+15 },
-        { label: '09:25 – 10:10', start: 9*60+25, end: 10*60+10 },
-        { label: '10:20 – 11:05', start: 10*60+20, end: 11*60+5 },
-        { label: '11:15 – 12:00', start: 11*60+15, end: 12*60 },
-        { label: '13:30 – 14:15', start: 13*60+30, end: 14*60+15 },
-        { label: '14:25 – 15:10', start: 14*60+25, end: 15*60+10 },
-        { label: '15:20 – 16:05', start: 15*60+20, end: 16*60+5 },
-        { label: '16:15 – 17:00', start: 16*60+15, end: 17*60 },
-        { label: '18:00 – 18:45', start: 18*60, end: 18*60+45 },
-        { label: '18:55 – 19:40', start: 18*60+55, end: 19*60+40 },
-        { label: '19:50 – 20:35', start: 19*60+50, end: 20*60+35 },
-        { label: '20:45 – 21:30', start: 20*60+45, end: 21*60+30 }
+        { label: '08:30-09:15', start: 8*60+30, end: 9*60+15 },
+        { label: '09:25-10:10', start: 9*60+25, end: 10*60+10 },
+        { label: '10:20-11:05', start: 10*60+20, end: 11*60+5 },
+        { label: '11:15-12:00', start: 11*60+15, end: 12*60 },
+        { label: '13:30-14:15', start: 13*60+30, end: 14*60+15 },
+        { label: '14:25-15:10', start: 14*60+25, end: 15*60+10 },
+        { label: '15:20-16:05', start: 15*60+20, end: 16*60+5 },
+        { label: '16:15-17:00', start: 16*60+15, end: 17*60 },
+        { label: '18:00-18:45', start: 18*60, end: 18*60+45 },
+        { label: '18:55-19:40', start: 18*60+55, end: 19*60+40 },
+        { label: '19:50-20:35', start: 19*60+50, end: 20*60+35 },
+        { label: '20:45-21:30', start: 20*60+45, end: 21*60+30 }
     ];
     const WEEKDAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     const GROUPS = [
@@ -305,192 +119,395 @@
         { name: '🌙 晚上', startIdx: 8, endIdx: 11 }
     ];
 
+    // ---------- 默认数据（每天不同，已填满）----------
     function getDefaultData() {
-        let data = Array(7).fill().map(() => Array(12).fill().map(() => ({
-            course: '—', room: '', weekType: 'all', startWeek: 1, endWeek: TOTAL_WEEKS
-        })));
+        let data = [];
+        for (let d = 0; d < 7; d++) {
+            data[d] = [];
+            for (let s = 0; s < 12; s++) {
+                data[d][s] = { course: '—', room: '', startWeek: 1, endWeek: TOTAL_WEEKS, oddEven: 'all' };
+            }
+        }
+
+        // 周一
+         data[0][4] = { course: '劳动教育', room: 'B205', startWeek: 4, endWeek: 7, oddEven: 'all' };
+        data[0][6] = { course: '计算机网络基础', room: 'B205', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[0][7] = { course: '计算机网络基础', room: 'B205', startWeek: 1, endWeek: 14, oddEven: 'all' };
+      
+        // 周二
+        data[1][0] = { course: '公共英语', room: 'B305', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[1][1] = { course: '公共英语', room: 'B305', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[1][2] = { course: '大学生职业发展与就业指导', room: 'B205', startWeek: 8, endWeek: 14, oddEven: 'all' };
+        data[1][3] = { course: '大学生职业发展与就业指导', room: 'B205', startWeek: 8, endWeek: 14, oddEven: 'all' };
+         data[1][8] = { course: 'Java程序设计', room: 'E501', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[1][9] = { course: 'Java程序设计', room: 'E501', startWeek: 1, endWeek: 14, oddEven: 'all' };
+
+         // 周三
+        data[2][0] = { course: '军事理论', room: 'B101', startWeek: 1, endWeek: 4, oddEven: 'all' };
+        data[2][1] = { course: '军事理论', room: 'B101', startWeek: 1, endWeek: 4, oddEven: 'all' };
+        data[2][4] = { course: 'Java程序设计', room: 'E502', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[2][5] = { course: 'Java程序设计', room: 'E502', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[2][6] = { course: '中华优秀传统文化', room: 'B207', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[2][7] = { course: '中华优秀传统文化', room: 'B207', startWeek: 1, endWeek: 14, oddEven: 'all' };
+
+       
+        // 周四
+        data[3][0] = { course: '形势与政策', room: 'B108', startWeek: 5, endWeek: 8, oddEven: 'all' };
+        data[3][1] = { course: '形势与政策', room: 'B108', startWeek: 5, endWeek: 8, oddEven: 'all' };
+        data[3][2] = { course: '高等数学', room: 'B109', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[3][3] = { course: '高等数学', room: 'B109', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[3][4] = { course: 'MySQL数据库技术', room: 'E501', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[3][5] = { course: 'MySQL', room: 'E501', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[3][6] = { course: '体育与健康', room: '', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[3][7] = { course: '体育与健康', room: '', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        
+        // 周五
+        data[4][0] = { course: '毛泽东思想和中国特色社会主义理论概述', room: 'B208', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[4][1] = { course: '毛泽东思想和中国特色社会主义理论概述', room: 'B208', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[4][2] = { course: '大学生心理健康教育', room: 'B305', startWeek: 2, endWeek: 14, oddEven: 'even' };
+        data[4][3] = { course: '大学生心理健康教育', room: 'B305', startWeek: 2, endWeek: 14, oddEven: 'even' };
+        data[4][4] = { course: 'Linux操作系统', room: 'F205', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[4][5] = { course: 'Linux操作系统', room: 'F205', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[4][6] = { course: 'Linux操作系统', room: 'F205', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        data[4][7] = { course: 'Linux操作系统', room: 'F205', startWeek: 1, endWeek: 14, oddEven: 'all' };
+        
+      
         return data;
     }
 
+    // ---------- 本地存储读写 ----------
     function loadData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
-                if (Array.isArray(parsed) && parsed.length === 7) return parsed;
-            } catch (e) {}
+                if (Array.isArray(parsed) && parsed.length === 7) {
+                    for (let d = 0; d < 7; d++) {
+                        for (let s = 0; s < 12; s++) {
+                            if (parsed[d][s] && !parsed[d][s].hasOwnProperty('oddEven')) {
+                                parsed[d][s].oddEven = 'all';
+                            }
+                        }
+                    }
+                    return parsed;
+                }
+            } catch(e) {}
         }
         return getDefaultData();
     }
-
     function saveData(data) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
-    let courseData = loadData();
-    let currentWeek = 1;
-    let highlightTimer = null;
-
-    function initWeekSelect() {
-        const sel = document.getElementById('weekSelect');
-        for (let i = 1; i <= TOTAL_WEEKS; i++) {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = `第 ${i} 周`;
-            sel.appendChild(opt);
+    // ---------- 开学日期与当前周计算 ----------
+    let startDate = null;
+    let currentWeekNum = 1;
+    
+    function loadStartDate() {
+        const saved = localStorage.getItem(START_DATE_KEY);
+        if (saved) {
+            const d = new Date(saved);
+            if (!isNaN(d.getTime())) {
+                startDate = d;
+                document.getElementById('startDateInput').value = saved;
+                return;
+            }
         }
-        sel.value = currentWeek;
-        sel.addEventListener('change', () => {
-            currentWeek = parseInt(sel.value);
-            refresh();
-        });
-        document.getElementById('prevWeek').onclick = () => {
-            if (currentWeek > 1) { currentWeek--; sel.value = currentWeek; refresh(); }
-        };
-        document.getElementById('nextWeek').onclick = () => {
-            if (currentWeek < TOTAL_WEEKS) { currentWeek++; sel.value = currentWeek; refresh(); }
-        };
+        const defaultDate = new Date(2026, 2, 09);
+        startDate = defaultDate;
+        document.getElementById('startDateInput').value = '2026-03-09';
+        localStorage.setItem(START_DATE_KEY, '2026-03-09');
     }
-
-    function isVisible(cell) {
-        if (cell.course === '—') return false;
-        if (currentWeek < cell.startWeek || currentWeek > cell.endWeek) return false;
-        if (cell.weekType === 'odd') return currentWeek % 2 === 1;
-        if (cell.weekType === 'even') return currentWeek % 2 === 0;
+    
+    function updateCurrentWeek() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+        let week = Math.floor(diffDays / 7) + 1;
+        if (week < 1) week = 1;
+        if (week > TOTAL_WEEKS) week = TOTAL_WEEKS;
+        currentWeekNum = week;
+        document.getElementById('currentWeekDisplay').innerText = `第${currentWeekNum}周`;
+        const weekSelect = document.getElementById('weekSelect');
+        if (weekSelect && !weekSelect.__userSelected) {
+            weekSelect.value = currentWeekNum;
+        }
+        return currentWeekNum;
+    }
+    
+    function onStartDateChange(e) {
+        const newDateStr = e.target.value;
+        if (newDateStr) {
+            const newDate = new Date(newDateStr);
+            if (!isNaN(newDate.getTime())) {
+                startDate = newDate;
+                localStorage.setItem(START_DATE_KEY, newDateStr);
+                updateCurrentWeek();
+                refreshTableAndHighlight();
+            }
+        }
+    }
+    
+    function isCourseVisible(cell, displayWeek) {
+        if (!cell || cell.course === '—') return false;
+        if (displayWeek < cell.startWeek || displayWeek > cell.endWeek) return false;
+        if (cell.oddEven === 'odd') return (displayWeek % 2 === 1);
+        if (cell.oddEven === 'even') return (displayWeek % 2 === 0);
         return true;
     }
 
+    // ---------- 渲染课表 ----------
+    let currentDisplayWeek = 1;
+    let tableElement = null;
+    let highlightTimer = null;
+    let courseData = loadData();
+    
     function renderTable() {
-        let html = '<table id="timetable"><thead><tr><th></th>';
+        const displayWeek = currentDisplayWeek;
+        let html = '78<table class="timetable"><thead><tr><th></th>';
         WEEKDAYS.forEach(day => html += `<th>${day}</th>`);
         html += '</tr></thead><tbody>';
-
-        GROUPS.forEach(g => {
-            html += `<tr class="section-header"><td colspan="8">${g.name}</td></tr>`;
-            for (let i = g.startIdx; i <= g.endIdx; i++) {
-                html += `<tr><td class="time-col">${TIME_SLOTS[i].label}</td>`;
-                for (let d = 0; d < 7; d++) {
-                    const cell = courseData[d][i];
-                    const show = isVisible(cell);
-                    const cls = d >= 5 ? 'weekend-col' : '';
-                    html += `<td class="${cls}" data-day="${d}" data-slot="${i}">`;
-                    if (show) {
-                        html += `<div class="course-block">
-                            <span class="course-name">${cell.course}</span>
-                            ${cell.room ? `<span class="course-room">${cell.room}</span>` : ''}
+        
+        GROUPS.forEach(group => {
+            html += `<tr class="section-header"><td colspan="8">${group.name}</td></tr>`;
+            for (let slotIdx = group.startIdx; slotIdx <= group.endIdx; slotIdx++) {
+                const slot = TIME_SLOTS[slotIdx];
+                html += '<tr>';
+                html += `<td class="time-col">${slot.label}</td>`;
+                for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+                    const cell = courseData[dayIdx][slotIdx] || { course: '—', room: '', startWeek: 1, endWeek: TOTAL_WEEKS, oddEven: 'all' };
+                    const visible = isCourseVisible(cell, displayWeek);
+                    let content = '';
+                    if (visible) {
+                        content = `<div class="course-block">
+                            <span class="course-name">${escapeHtml(cell.course)}</span>
+                            ${cell.room ? `<span class="course-room">${escapeHtml(cell.room)}</span>` : ''}
                         </div>`;
                     } else {
-                        html += `<div class="course-block"><span class="empty-course">—</span></div>`;
+                        content = `<div class="course-block"><span class="course-name empty-course">—</span></div>`;
                     }
-                    html += `</td>`;
+                    html += `<td data-day="${dayIdx}" data-slot="${slotIdx}">${content}</td>`;
                 }
-                html += `</tr>`;
+                html += '</tr>';
             }
         });
         html += '</tbody></table>';
         document.getElementById('tableWrapper').innerHTML = html;
-        document.getElementById('timetable').addEventListener('dblclick', handleEdit);
+        tableElement = document.querySelector('#tableWrapper table');
+        if (tableElement) {
+            tableElement.addEventListener('dblclick', handleDoubleClick);
+        }
     }
-
-    function handleEdit(e) {
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function handleDoubleClick(e) {
         const td = e.target.closest('td');
         if (!td) return;
-        const day = parseInt(td.dataset.day);
-        const slot = parseInt(td.dataset.slot);
-        const old = courseData[day][slot];
-
-        let ruleText = '';
-        if (old.weekType === 'odd') ruleText = '单周';
-        else if (old.weekType === 'even') ruleText = '双周';
-        else ruleText = `${old.startWeek}-${old.endWeek}`;
-
-        const def = (old.course === '—' ? '' : old.course)
-            + (old.room ? `, ${old.room}` : '')
-            + (old.course === '—' ? '' : `, ${ruleText}`);
-
-        const input = prompt('格式：课程名, 教室, 周次\n每周：1-14｜单周｜双周', def);
-        if (input === null) return;
-
-        const t = input.trim();
-        if (t === '' || t === '—') {
-            courseData[day][slot] = { course: '—', room: '', weekType: 'all', startWeek: 1, endWeek: TOTAL_WEEKS };
-            saveData(courseData); refresh(); return;
+        const day = td.getAttribute('data-day');
+        const slot = td.getAttribute('data-slot');
+        if (day === null || slot === null) return;
+        const dayIdx = parseInt(day, 10);
+        const slotIdx = parseInt(slot, 10);
+        const old = courseData[dayIdx][slotIdx] || { course: '—', room: '', startWeek: 1, endWeek: TOTAL_WEEKS, oddEven: 'all' };
+        let defaultPrompt = old.course === '—' ? '' : old.course;
+        if (old.room && old.course !== '—') defaultPrompt += `, ${old.room}`;
+        if (old.course !== '—' && (old.startWeek !== 1 || old.endWeek !== TOTAL_WEEKS)) {
+            defaultPrompt += `, ${old.startWeek}-${old.endWeek}`;
         }
-
-        const parts = t.split(',').map(s => s.trim());
-        let course = parts[0] || '—';
-        let room = parts[1] || '';
-        let weekType = 'all';
-        let startWeek = 1, endWeek = TOTAL_WEEKS;
-
-        if (parts.length >= 3) {
-            const rule = parts[2];
-            if (rule === '单周') weekType = 'odd';
-            else if (rule === '双周') weekType = 'even';
-            else {
-                const [s, e] = rule.split('-').map(Number);
-                if (!isNaN(s) && !isNaN(e)) { startWeek = s; endWeek = e; }
+        if (old.course !== '—') {
+            defaultPrompt += `, ${old.oddEven}`;
+        }
+        const input = prompt(
+            '修改课程 (格式: 课程名, 教室, 起始周-结束周, 单双周)\n单双周: all(每周) / odd(单周) / even(双周)\n例: 高等数学, A101, 1-14, odd',
+            defaultPrompt
+        );
+        if (input === null) return;
+        
+        let newCourse = '—', newRoom = '', newStart = 1, newEnd = TOTAL_WEEKS, newOddEven = 'all';
+        const trimmed = input.trim();
+        if (trimmed !== '' && trimmed !== '—') {
+            const parts = trimmed.split(',').map(s => s.trim());
+            if (parts[0]) newCourse = parts[0];
+            if (parts[1]) newRoom = parts[1];
+            if (parts[2]) {
+                const range = parts[2].split('-').map(v => parseInt(v,10));
+                if (range.length === 2 && !isNaN(range[0]) && !isNaN(range[1])) {
+                    newStart = Math.min(Math.max(range[0], 1), TOTAL_WEEKS);
+                    newEnd = Math.min(Math.max(range[1], 1), TOTAL_WEEKS);
+                    if (newStart > newEnd) [newStart, newEnd] = [newEnd, newStart];
+                }
+            }
+            if (parts[3]) {
+                const oe = parts[3].toLowerCase();
+                if (oe === 'odd' || oe === 'even' || oe === 'all') {
+                    newOddEven = oe;
+                }
             }
         }
-
-        courseData[day][slot] = { course, room, weekType, startWeek, endWeek };
+        courseData[dayIdx][slotIdx] = {
+            course: newCourse,
+            room: newRoom,
+            startWeek: newStart,
+            endWeek: newEnd,
+            oddEven: newOddEven
+        };
         saveData(courseData);
-        refresh();
-    }
-
-    function getNowCourse() {
-        const now = new Date();
-        const h = now.getHours(), m = now.getMinutes();
-        const nowMin = h * 60 + m;
-        const day = now.getDay();
-        const col = day === 0 ? 6 : day - 1;
-
-        let slotIdx = -1;
-        for (let i = 0; i < TIME_SLOTS.length; i++) {
-            const s = TIME_SLOTS[i];
-            if (nowMin >= s.start && nowMin < s.end) { slotIdx = i; break; }
-        }
-        if (slotIdx === -1) return null;
-        const cell = courseData[col][slotIdx];
-        if (!isVisible(cell)) return null;
-        return { col, slotIdx, cell };
-    }
-
-    function updateClockAndHighlight() {
-        const now = new Date();
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
-        document.getElementById('liveClock').innerText =
-            `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${hh}:${mm}:${ss}`;
-
-        document.querySelectorAll('.highlight').forEach(e => e.classList.remove('highlight'));
-        const curr = getNowCourse();
-        if (!curr) {
-            document.getElementById('currentCourseInfo').innerText = '无课';
-            document.getElementById('countdownDisplay').innerText = '';
-            return;
-        }
-        document.getElementById('currentCourseInfo').innerText =
-            curr.cell.course + (curr.cell.room ? ` (${curr.cell.room})` : '');
-        const td = document.querySelector(`td[data-day="${curr.col}"][data-slot="${curr.slotIdx}"]`);
-        if (td) td.classList.add('highlight');
-    }
-
-    function refresh() {
         renderTable();
-        updateClockAndHighlight();
+        updateHighlightAndClock();
     }
-
-    function start() {
-        initWeekSelect();
-        refresh();
-        highlightTimer = setInterval(updateClockAndHighlight, 1000);
+    
+    function getCurrentCourse() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const dayOfWeek = now.getDay();
+        const colIdx = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const currentMinutes = hours * 60 + minutes;
+        const currentSeconds = hours * 3600 + minutes * 60 + now.getSeconds();
+        
+        let slotIdx = -1, matchedSlot = null;
+        for (let i = 0; i < TIME_SLOTS.length; i++) {
+            const slot = TIME_SLOTS[i];
+            if (currentMinutes >= slot.start && currentMinutes < slot.end) {
+                slotIdx = i;
+                matchedSlot = slot;
+                break;
+            }
+        }
+        if (slotIdx === -1) return { courseObj: null, endSeconds: null, currentSeconds, slotIdx, colIdx };
+        const cell = courseData[colIdx]?.[slotIdx];
+        const visible = cell && cell.course !== '—' && isCourseVisible(cell, currentWeekNum);
+        if (!visible) return { courseObj: null, endSeconds: matchedSlot ? matchedSlot.end * 60 : null, currentSeconds, slotIdx, colIdx };
+        return {
+            courseObj: { course: cell.course, room: cell.room },
+            endSeconds: matchedSlot.end * 60,
+            currentSeconds,
+            slotIdx,
+            colIdx
+        };
     }
-
-    window.addEventListener('DOMContentLoaded', start);
-    window.addEventListener('beforeunload', () => clearInterval(highlightTimer));
-})();
+    
+    function updateHighlightAndClock() {
+        const now = new Date();
+        const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+        document.getElementById('liveClock').innerText = timeStr;
+        
+        document.querySelectorAll('.highlight').forEach(cell => cell.classList.remove('highlight'));
+        const info = getCurrentCourse();
+        const currentCourseSpan = document.getElementById('currentCourseInfo');
+        const countdownSpan = document.getElementById('countdownDisplay');
+        if (info.courseObj) {
+            let display = info.courseObj.course + (info.courseObj.room ? ` (${info.courseObj.room})` : '');
+            currentCourseSpan.innerText = display;
+            const target = document.querySelector(`td[data-day="${info.colIdx}"][data-slot="${info.slotIdx}"]`);
+            if (target) target.classList.add('highlight');
+            if (info.endSeconds) {
+                const remain = info.endSeconds - info.currentSeconds;
+                if (remain > 0) {
+                    const mins = Math.floor(remain / 60);
+                    const secs = remain % 60;
+                    countdownSpan.innerText = `⏳ ${mins}分${secs<10?'0'+secs:secs}秒`;
+                } else {
+                    countdownSpan.innerText = '⏳ 即将下课';
+                }
+            } else {
+                countdownSpan.innerText = '';
+            }
+        } else {
+            currentCourseSpan.innerText = '无课';
+            countdownSpan.innerText = '';
+        }
+    }
+    
+    function refreshTableAndHighlight() {
+        renderTable();
+        updateHighlightAndClock();
+    }
+    
+    function initWeekSelector() {
+        const select = document.getElementById('weekSelect');
+        for (let i = 1; i <= TOTAL_WEEKS; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i}`;
+            select.appendChild(option);
+        }
+        select.value = currentWeekNum;
+        currentDisplayWeek = currentWeekNum;
+        
+        select.addEventListener('change', (e) => {
+            currentDisplayWeek = parseInt(e.target.value, 10);
+            select.__userSelected = true;
+            renderTable();
+            updateHighlightAndClock();
+        });
+        document.getElementById('prevWeek').addEventListener('click', () => {
+            let newWeek = currentDisplayWeek - 1;
+            if (newWeek >= 1) {
+                currentDisplayWeek = newWeek;
+                select.value = currentDisplayWeek;
+                select.__userSelected = true;
+                renderTable();
+                updateHighlightAndClock();
+            }
+        });
+        document.getElementById('nextWeek').addEventListener('click', () => {
+            let newWeek = currentDisplayWeek + 1;
+            if (newWeek <= TOTAL_WEEKS) {
+                currentDisplayWeek = newWeek;
+                select.value = currentDisplayWeek;
+                select.__userSelected = true;
+                renderTable();
+                updateHighlightAndClock();
+            }
+        });
+    }
+    
+    function startTimer() {
+        if (highlightTimer) clearInterval(highlightTimer);
+        updateHighlightAndClock();
+        highlightTimer = setInterval(updateHighlightAndClock, 1000);
+    }
+    
+    // 重置按钮事件
+    function initResetButton() {
+        const resetBtn = document.getElementById('resetBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                if (confirm('重置将清除所有修改，恢复默认课表，确定吗？')) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(START_DATE_KEY);
+                    location.reload();
+                }
+            });
+        } else {
+            console.warn('未找到重置按钮，请检查 id="resetBtn" 是否存在');
+        }
+    }
+    
+    // ---------- 初始化 ----------
+    function init() {
+        loadStartDate();
+        courseData = loadData();
+        updateCurrentWeek();
+        initWeekSelector();
+        renderTable();
+        startTimer();
+        initResetButton();
+        document.getElementById('startDateInput').addEventListener('change', onStartDateChange);
+    }
+    init();
 </script>
 </body>
 </html>
